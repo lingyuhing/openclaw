@@ -12,12 +12,42 @@ export type MediaAttachment = {
   index: number;
 };
 
+/**
+ * Speaker diarization segment information
+ */
+export type DiarizationSegment = {
+  /** Speaker identifier (0, 1, 2, etc.) */
+  speakerId: number;
+  /** Start time in seconds */
+  startTime: number;
+  /** End time in seconds */
+  endTime: number;
+  /** Transcribed text for this segment */
+  text: string;
+  /** Confidence score (0-1) */
+  confidence?: number;
+};
+
+/**
+ * Speaker diarization information attached to transcription results
+ */
+export type DiarizationInfo = {
+  /** Array of speaker segments with timing */
+  segments: DiarizationSegment[];
+  /** Total number of unique speakers detected */
+  speakerCount: number;
+  /** Formatted output with speaker labels */
+  formattedOutput: string;
+};
+
 export type MediaUnderstandingOutput = {
   kind: MediaUnderstandingKind;
   attachmentIndex: number;
   text: string;
   provider: string;
   model?: string;
+  /** Optional diarization information for audio transcriptions */
+  diarization?: DiarizationInfo;
 };
 
 export type MediaUnderstandingDecisionOutcome =
@@ -60,11 +90,19 @@ export type AudioTranscriptionRequest = {
   query?: Record<string, string | number | boolean>;
   timeoutMs: number;
   fetchFn?: typeof fetch;
+  /** Optional diarization configuration */
+  diarization?: {
+    enabled: boolean;
+    speakerCountMin?: number;
+    speakerCountMax?: number;
+  };
 };
 
 export type AudioTranscriptionResult = {
   text: string;
   model?: string;
+  /** Optional diarization information when diarization is enabled */
+  diarization?: DiarizationInfo;
 };
 
 export type VideoDescriptionRequest = {

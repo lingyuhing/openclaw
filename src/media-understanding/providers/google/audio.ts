@@ -19,6 +19,48 @@ function resolvePrompt(prompt?: string): string {
   return trimmed || DEFAULT_GOOGLE_AUDIO_PROMPT;
 }
 
+/**
+ * Google Cloud STT response types for diarization
+ */
+type GoogleWordInfo = {
+  startOffset?: {
+    seconds: number;
+    nanos?: number;
+  };
+  endOffset?: {
+    seconds: number;
+    nanos?: number;
+  };
+  word: string;
+  confidence?: number;
+  speakerTag?: number;
+};
+
+type GoogleAlternative = {
+  transcript: string;
+  confidence?: number;
+  words?: GoogleWordInfo[];
+};
+
+type GoogleResult = {
+  alternatives?: GoogleAlternative[];
+  resultEndTime?: {
+    seconds: number;
+    nanos?: number;
+  };
+  channelTag?: number;
+  languageCode?: string;
+};
+
+type GoogleResponse = {
+  results?: GoogleResult[];
+  totalBilledTime?: {
+    seconds: number;
+    nanos?: number;
+  };
+  requestId?: string;
+};
+
 export async function transcribeGeminiAudio(
   params: AudioTranscriptionRequest,
 ): Promise<AudioTranscriptionResult> {
@@ -85,8 +127,99 @@ export async function transcribeGeminiAudio(
     if (!text) {
       throw new Error("Audio transcription response missing text");
     }
+
+    // Check if the response contains speaker labels (diarization)
+    const hasSpeakerLabels = text.includes("Speaker") || text.includes(":");
+
+    if (hasSpeakerLabels) {
+      // Try to parse speaker labels from the transcript
+      const diarizationData = parseSpeakerLabelsFromText(text);
+      return {
+        text,
+        model,
+        diarization: diarizationData,
+      };
+    }
+
     return { text, model };
   } finally {
     await release();
   }
+}
+
+/**
+ * Parse speaker labels from transcript text
+ * Handles formats like:
+ * - "Speaker 0: Hello world"
+ * - "Speaker 1 (ABC123...): How are you?"
+ */
+function parseSpeakerLabelsFromText(text: string): {
+  segments: Array<{
+    speakerId: number;
+    startTime: number;
+    endTime: number;
+    text: string;
+    confidence?: number;
+  }>;
+  speakerCount: number;
+  formattedOutput: string;
+} {
+  const segments: Array<{
+    speakerId: number;
+    startTime: number;
+    endTime: number;
+    text: string;
+    confidence?: number;
+  }> = [];
+
+  // Split text by newlines and parse each line
+  const lines = text.split("\n");
+  const speakerSet = new Set<number>();
+  let currentTime = 0;
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+
+    // Match patterns like "Speaker 0:", "Speaker 1 (ABC123...):", "Speaker 2:"
+    const match = trimmed.match(/^Speaker\s+(\d+)(?:\s*\([^)]*\))?\s*:\s*(.+)$/i);
+    if (match) {
+      const speakerId = parseInt(match[1], 10);
+      const text = match[2].trim();
+      speakerSet.add(speakerId);
+
+      // Estimate timing (2 words per second)
+      const wordCount = text.split(/\s+/).length;
+      const duration = Math.max(1, wordCount / 2);
+
+      segments.push({
+        speakerId,
+        startTime: currentTime,
+        endTime: currentTime + duration,
+        text,
+      });
+
+      currentTime += duration + 0.5; // Add pause between segments
+    }
+  }
+
+  // Build formatted output
+  const outputLines: string[] = [];
+  let currentSpeakerId: number | null = null;
+
+  for (const segment of segments) {
+    if (segment.speakerId !== currentSpeakerId) {
+      currentSpeakerId = segment.speakerId;
+      outputLines.push(`Speaker ${segment.speakerId}:`);
+    }
+    outputLines.push(`  ${segment.text}`);
+  }
+
+  const formattedOutput = outputLines.join("\n").trim();
+
+  return {
+    segments,
+    speakerCount: speakerSet.size,
+    formattedOutput,
+  };
 }
