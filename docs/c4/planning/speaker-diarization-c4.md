@@ -293,11 +293,13 @@ flowchart TB
   - ID 必须与声纹特征强相关
   - 每个声纹必须有一个且仅有一个唯一的 ID 与之关联
   - 使用相同的算法在任何地方生成的 ID 必须相同（只要声纹相同）
+  - **强制要求**: 无论语音中有几个说话人（包括只有一个人），都必须给这个人的声纹打上一个 ID
 - **ID 生成算法**: 使用声纹特征的哈希值作为 ID
   - 提取音频的声纹特征向量 (Voiceprint Features)
   - 使用 SHA-256 等确定性哈希算法生成 ID
   - 相同声纹 → 相同特征向量 → 相同哈希值 → 相同 ID
 - **跨平台一致性**: 只要使用相同的特征提取算法和哈希算法，在任何地方生成的 ID 都相同
+- **单说话人场景**: 即使检测到只有一个人在说话，也会为其声纹生成唯一的 ID
 - **示例 ID 格式**: `vpr_7a3f9c2d8e1b4a5f6c3d9e2a1b7c8d3f` (基于声纹哈希)
 
 **SpeakerIdAssigner** (ID 分配器)
@@ -368,6 +370,8 @@ sequenceDiagram
 
 ### 1. 启用说话人分离 (Deepgram)
 
+**重要**: 无论语音中有一个还是多个说话人，系统都会为每个声纹生成唯一的 ID。
+
 ```yaml
 # config.yaml
 tools:
@@ -378,10 +382,12 @@ tools:
       diarizationOptions:
         provider: deepgram
         model: nova-2
-        speakerCountMin: 2
+        speakerCountMin: 1  # 设置为1，即使单说话人也生成ID
         speakerCountMax: 6
         speakerLabelFormat: "Speaker {id}"  # 选项: "Person {letter}", "说话人 {id}"
         utterances: true  # 启用话语分割
+        # 关键配置: 无论说话人数量，都强制生成声纹ID
+        forceVoiceprintIdForAllSpeakers: true
 ```
 
 ### 2. Google Cloud STT 配置
