@@ -149,6 +149,7 @@ flowchart TB
         end
         
         subgraph SpeakerMapper["Speaker Mapper<br/>说话人映射"]
+            VoiceprintIdGenerator["VoiceprintIdGenerator<br/>声纹 ID 生成器"]
             SpeakerIdAssigner["SpeakerIdAssigner<br/>ID 分配器"]
             SpeakerConsistencyChecker["ConsistencyChecker<br/>一致性检查器"]
             SpeakerAliasManager["AliasManager<br/>别名管理"]
@@ -183,9 +184,10 @@ flowchart TB
     DeepgramAPI --> DeepgramParser
     GoogleAPI --> GoogleParser
     
-    DeepgramParser --> SpeakerIdAssigner
-    GoogleParser --> SpeakerIdAssigner
+    DeepgramParser --> VoiceprintIdGenerator
+    GoogleParser --> VoiceprintIdGenerator
     
+    VoiceprintIdGenerator --> SpeakerIdAssigner
     SpeakerConfig --> SpeakerIdAssigner
     SpeakerIdAssigner --> SpeakerConsistencyChecker
     SpeakerConsistencyChecker --> SpeakerAliasManager
@@ -285,20 +287,42 @@ flowchart TB
 
 #### 4. Speaker Mapper (说话人映射)
 
+**VoiceprintIdGenerator** (声纹 ID 生成器 - 核心组件)
+- **核心职责**: 从音频特征生成**确定性、唯一性**的说话人 ID
+- **关键约束**: 
+  - ID 必须与声纹特征强相关
+  - 每个声纹必须有一个且仅有一个唯一的 ID 与之关联
+  - 使用相同的算法在任何地方生成的 ID 必须相同（只要声纹相同）
+- **ID 生成算法**: 使用声纹特征的哈希值作为 ID
+  - 提取音频的声纹特征向量 (Voiceprint Features)
+  - 使用 SHA-256 等确定性哈希算法生成 ID
+  - 相同声纹 → 相同特征向量 → 相同哈希值 → 相同 ID
+- **跨平台一致性**: 只要使用相同的特征提取算法和哈希算法，在任何地方生成的 ID 都相同
+- **示例 ID 格式**: `vpr_7a3f9c2d8e1b4a5f6c3d9e2a1b7c8d3f` (基于声纹哈希)
+
 **SpeakerIdAssigner** (ID 分配器)
-- 将原始 speaker ID (0, 1, 2...) 映射为可读的标识
+- 接收 VoiceprintIdGenerator 生成的确定性 ID
+- 将 ID 映射为可读的显示名称
 - 格式选项:
-  - `Speaker 0`, `Speaker 1` (默认)
-  - `Person A`, `Person B`
-  - `说话人 0`, `说话人 1` (中文)
+  - `Speaker {id}` (默认)
+  - `Person {letter}`
+  - `说话人 {id}` (中文)
+  - 用户自定义别名 (从 AliasManager 获取)
 
 **ConsistencyChecker** (一致性检查器)
-- 确保相同声音在多次转录中保持一致的 ID
-- 可选: 使用声纹特征进行跨会话匹配
+- 确保相同声纹在不同会话中保持一致的 ID
+- **实现方式**: 使用 VoiceprintIdGenerator 的确定性 ID，天然保证跨会话一致性
+- 可选: 维护声纹 ID 到元数据的映射表 (创建时间、最后出现时间、出现次数等)
+- **声纹数据库**: 存储声纹特征向量与 ID 的映射，用于快速查找和验证
 
 **AliasManager** (别名管理)
-- 允许用户为说话人分配自定义名称
+- 允许用户为声纹 ID 分配自定义名称
 - 支持手动映射和自动记忆
+- **持久化**: 将声纹 ID → 别名的映射存储在数据库中
+- **示例映射**:
+  - `vpr_7a3f9c2d...` → "张三"
+  - `vpr_3e8a1b5c...` → "李四"
+- **API 接口**: 提供管理别名的接口 (创建、更新、删除、查询)
 
 ---
 
