@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>i18n Demo - OpenClaw</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background: #f5f5f5;
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: white;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        margin-top: 0;
+        color: #333;
+      }
+      .section {
+        margin: 30px 0;
+        padding: 20px;
+        background: #f9f9f9;
+        border-radius: 6px;
+      }
+      .section h2 {
+        margin-top: 0;
+        color: #555;
+        font-size: 1.2em;
+      }
+      .demo-row {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin: 15px 0;
+        flex-wrap: wrap;
+      }
+      .label {
+        font-weight: 500;
+        color: #666;
+        min-width: 100px;
+      }
+      .value {
+        color: #333;
+        font-family: monospace;
+        background: #e9e9e9;
+        padding: 4px 8px;
+        border-radius: 3px;
+      }
+      .status {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 0.85em;
+        font-weight: 500;
+      }
+      .status.ready {
+        background: #d4edda;
+        color: #155724;
+      }
+      .status.loading {
+        background: #fff3cd;
+        color: #856404;
+      }
+      .status.error {
+        background: #f8d7da;
+        color: #721c24;
+      }
+      button {
+        padding: 8px 16px;
+        border: 1px solid #ddd;
+        background: white;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.2s;
+      }
+      button:hover {
+        background: #f5f5f5;
+        border-color: #bbb;
+      }
+      button:active {
+        background: #e9e9e9;
+      }
+      .placeholder {
+        color: #999;
+        font-style: italic;
+      }
+      code {
+        background: #f4f4f4;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-family: "Consolas", "Monaco", monospace;
+        font-size: 0.9em;
+      }
+      pre {
+        background: #f4f4f4;
+        padding: 15px;
+        border-radius: 6px;
+        overflow-x: auto;
+      }
+      pre code {
+        background: none;
+        padding: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🌐 i18n Internationalization Demo</h1>
+      <p>This page demonstrates the i18n system integrated into OpenClaw UI.</p>
+
+      <div class="section">
+        <h2>📊 System Status</h2>
+        <div class="demo-row">
+          <span class="label">i18n Status:</span>
+          <span id="i18n-status" class="status loading">Loading...</span>
+        </div>
+        <div class="demo-row">
+          <span class="label">Current Language:</span>
+          <span id="current-lang" class="value placeholder">-</span>
+        </div>
+        <div class="demo-row">
+          <span class="label">Supported Languages:</span>
+          <span id="supported-langs" class="value">en, zh</span>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>🔄 Language Switcher Component</h2>
+        <p>
+          The <code>&lt;language-switcher&gt;</code> component provides a dropdown to switch
+          languages:
+        </p>
+        <div class="demo-row">
+          <language-switcher id="lang-switcher"></language-switcher>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>📝 Translation Examples</h2>
+        <p>The <code>&lt;t-text&gt;</code> component automatically translates content:</p>
+
+        <div class="demo-row">
+          <span class="label">Simple:</span>
+          <t-text key="common.save"></t-text>
+        </div>
+
+        <div class="demo-row">
+          <span class="label">Navigation:</span>
+          <t-text key="nav.chat"></t-text> | <t-text key="nav.config"></t-text> |
+          <t-text key="nav.agents"></t-text>
+        </div>
+
+        <div class="demo-row">
+          <span class="label">With Params:</span>
+          <span id="param-example">-</span>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>⚙️ Programmatic API</h2>
+        <p>You can also use the i18n API programmatically:</p>
+
+        <div class="demo-row">
+          <button id="btn-en">Switch to English</button>
+          <button id="btn-zh">切换到中文</button>
+        </div>
+
+        <div class="demo-row">
+          <span class="label">API Result:</span>
+          <span id="api-result" class="value">-</span>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>📖 Usage Example</h2>
+        <pre><code>// Initialize i18n
+import { initAppI18n, t } from "./i18n/init.js";
+
+await initAppI18n();
+
+// Use in components
+const text = t("common.save");
+// "Save" or "保存"
+
+// Or use components
+&lt;t-text key="nav.chat"&gt;&lt;/t-text&gt;</code></pre>
+      </div>
+    </div>
+
+    <script type="module">
+      import { initAppI18n, getAppI18n, t } from "../src/i18n/init.js";
+      import "../src/i18n/components/language-switcher.js";
+      import "../src/i18n/components/t-text.js";
+
+      // Initialize i18n
+      let i18n;
+      try {
+        i18n = await initAppI18n();
+        updateStatus("ready", "Ready");
+        updateLanguageInfo();
+      } catch (error) {
+        console.error("Failed to initialize i18n:", error);
+        updateStatus("error", "Error");
+      }
+
+      function updateStatus(type, text) {
+        const status = document.getElementById("i18n-status");
+        status.className = `status ${type}`;
+        status.textContent = text;
+      }
+
+      function updateLanguageInfo() {
+        if (!i18n) return;
+        document.getElementById("current-lang").textContent = i18n.currentLang;
+        document.getElementById("current-lang").classList.remove("placeholder");
+      }
+
+      // Update param example
+      function updateParamExample() {
+        const example = document.getElementById("param-example");
+        if (i18n) {
+          // Use a key that has params
+          example.textContent = i18n.t("chat.placeholder");
+        }
+      }
+      updateParamExample();
+
+      // Listen for language changes
+      if (i18n) {
+        i18n.onLanguageChange(() => {
+          updateLanguageInfo();
+          updateParamExample();
+          updateApiResult();
+        });
+      }
+
+      // API buttons
+      document.getElementById("btn-en").addEventListener("click", async () => {
+        if (i18n) {
+          await i18n.setLanguage("en");
+        }
+      });
+
+      document.getElementById("btn-zh").addEventListener("click", async () => {
+        if (i18n) {
+          await i18n.setLanguage("zh");
+        }
+      });
+
+      function updateApiResult() {
+        const result = document.getElementById("api-result");
+        if (i18n) {
+          result.textContent = `${i18n.t("language.current")}: ${i18n.currentLang}`;
+        }
+      }
+      updateApiResult();
+    </script>
+  </body>
+</html>
