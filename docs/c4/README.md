@@ -4,35 +4,40 @@
 
 ## 文件结构
 
-| 文件 | 级别 | 描述 |
-|------|------|------|
-| [level1-context.md](./level1-context.md) | Level 1 - System Context | 系统上下文图，展示 OpenClaw 与外部系统的交互关系 |
-| [level2-container.md](./level2-container.md) | Level 2 - Container | 容器图，展示 OpenClaw 内部的主要容器/应用 |
-| [level3-component-gateway.md](./level3-component-gateway.md) | Level 3 - Component | 组件图 - Gateway 详细设计 |
-| [level3-component-agent.md](./level3-component-agent.md) | Level 3 - Component | 组件图 - Agent 运行时详细设计 |
-| [level3-component-channels.md](./level3-component-channels.md) | Level 3 - Component | 组件图 - Channels 子系统详细设计 |
+| 文件                                                                 | 级别                     | 描述                                             |
+| -------------------------------------------------------------------- | ------------------------ | ------------------------------------------------ |
+| [level1-context.md](./level1-context.md)                             | Level 1 - System Context | 系统上下文图，展示 OpenClaw 与外部系统的交互关系 |
+| [level2-container.md](./level2-container.md)                         | Level 2 - Container      | 容器图，展示 OpenClaw 内部的主要容器/应用        |
+| [level3-component-gateway.md](./level3-component-gateway.md)         | Level 3 - Component      | 组件图 - Gateway 详细设计                        |
+| [level3-component-agent.md](./level3-component-agent.md)             | Level 3 - Component      | 组件图 - Agent 运行时详细设计                    |
+| [level3-component-channels.md](./level3-component-channels.md)       | Level 3 - Component      | 组件图 - Channels 子系统详细设计                 |
+| [level3-component-android-app.md](./level3-component-android-app.md) | Level 3 - Component      | 组件图 - Android App 详细设计                    |
 
 ## C4 Model 简介
 
 C4 Model 是一种分层的方法来描述软件架构，由 Simon Brown 创建。它将架构图分为四个层次：
 
 ### Level 1: System Context (系统上下文)
+
 - **范围**: 整个系统
 - **目标读者**: 所有人，包括非技术人员
 - **内容**: 系统与外部用户和系统的交互关系
 
 ### Level 2: Container (容器)
+
 - **范围**: 系统内部
 - **目标读者**: 技术人员
 - **内容**: 系统的主要容器/应用及其关系
 - **注意**: "容器"指的是独立运行/部署的单元，不一定是 Docker 容器
 
 ### Level 3: Component (组件)
+
 - **范围**: 单个容器内部
 - **目标读者**: 开发者
 - **内容**: 容器的内部结构和组件
 
 ### Level 4: Code (代码)
+
 - **范围**: 单个组件
 - **目标读者**: 开发者
 - **内容**: 实际的代码实现（通常使用 UML 类图）
