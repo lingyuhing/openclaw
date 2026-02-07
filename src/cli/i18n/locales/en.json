@@ -1,0 +1,56 @@
+{
+  "meta": {
+    "language": "English",
+    "locale": "en"
+  },
+  "common": {
+    "hello": "Hello",
+    "welcome": "Welcome, {{name}}!",
+    "goodbye": "Goodbye",
+    "error": "Error",
+    "success": "Success",
+    "warning": "Warning",
+    "info": "Info",
+    "loading": "Loading...",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "yes": "Yes",
+    "no": "No",
+    "ok": "OK",
+    "items_one": "{{count}} item",
+    "items_other": "{{count}} items"
+  },
+  "commands": {
+    "gateway": {
+      "description": "Gateway control commands",
+      "start": {
+        "success": "Gateway started successfully",
+        "port": "Listening on port: {{port}}"
+      },
+      "stop": {
+        "success": "Gateway stopped successfully"
+      },
+      "restart": {
+        "success": "Gateway restarted successfully"
+      }
+    },
+    "config": {
+      "description": "Configuration commands",
+      "get": {
+        "success": "Configuration value: {{value}}"
+      },
+      "set": {
+        "success": "Configuration updated successfully"
+      }
+    }
+  },
+  "errors": {
+    "generic": "An error occurred",
+    "notFound": "Resource not found",
+    "invalidInput": "Invalid input provided",
+    "permissionDenied": "Permission denied",
+    "timeout": "Operation timed out",
+    "languageNotSupported": "Language '{{lang}}' is not supported",
+    "translationNotFound": "Translation not found for key '{{key}}'"
+  }
+}

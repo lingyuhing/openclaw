@@ -1,0 +1,56 @@
+{
+  "meta": {
+    "language": "中文",
+    "locale": "zh"
+  },
+  "common": {
+    "hello": "你好",
+    "welcome": "欢迎，{{name}}！",
+    "goodbye": "再见",
+    "error": "错误",
+    "success": "成功",
+    "warning": "警告",
+    "info": "信息",
+    "loading": "加载中...",
+    "cancel": "取消",
+    "confirm": "确认",
+    "yes": "是",
+    "no": "否",
+    "ok": "确定",
+    "items_one": "{{count}} 项",
+    "items_other": "{{count}} 项"
+  },
+  "commands": {
+    "gateway": {
+      "description": "网关控制命令",
+      "start": {
+        "success": "网关已启动",
+        "port": "监听端口：{{port}}"
+      },
+      "stop": {
+        "success": "网关已停止"
+      },
+      "restart": {
+        "success": "网关已重启"
+      }
+    },
+    "config": {
+      "description": "配置命令",
+      "get": {
+        "success": "配置值：{{value}}"
+      },
+      "set": {
+        "success": "配置更新成功"
+      }
+    }
+  },
+  "errors": {
+    "generic": "发生错误",
+    "notFound": "资源未找到",
+    "invalidInput": "输入无效",
+    "permissionDenied": "权限被拒绝",
+    "timeout": "操作超时",
+    "languageNotSupported": "不支持语言 '{{lang}}'",
+    "translationNotFound": "未找到键 '{{key}}' 的翻译"
+  }
+}
