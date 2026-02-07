@@ -2,31 +2,39 @@
 
 ## Quick Commands
 
-```bash
-# Setup
-pnpm install          # Install dependencies
+### Setup & Development
 
-# Development
+```bash
+pnpm install          # Install dependencies
 pnpm dev             # Run CLI in dev mode
 pnpm gateway:watch   # Watch mode for gateway
+```
 
-# Build & Check
+### Build & Check
+
+```bash
 pnpm build           # Full build
 pnpm tsgo            # TypeScript check only
 pnpm check           # Lint + format + type check
+```
 
-# Testing
-pnpm test            # Run all tests (parallel)
-pnpm test:watch      # Watch mode
-pnpm test:coverage   # With coverage
+### Testing
+
+```bash
+pnpm test                    # Run all tests (parallel)
+pnpm test:watch             # Watch mode
+pnpm test:coverage          # With coverage
 
 # Single test file:
 npx vitest run src/path/to/file.test.ts
 
-# Single test (pattern):
-npx vitest run -t "test name pattern"
+# Single test by name:
+npx vitest run -t "should handle valid input"
+```
 
-# Lint/Format
+### Lint/Format
+
+```bash
 pnpm lint            # Check linting
 pnpm lint:fix        # Fix lint issues
 pnpm format          # Check formatting
@@ -36,41 +44,44 @@ pnpm format:fix      # Fix formatting
 ## Code Style Guidelines
 
 ### Language & Types
-- **TypeScript (ESM)** - strict mode enabled, avoid `any`
-- Use explicit types for function parameters and return types
+
+- **TypeScript (ESM)** - strict mode, avoid `any`
+- Explicit types for function parameters and return types
 - Prefer `interface` over `type` for object shapes
 - Use discriminated unions for state machines
 
 ### Imports & Module Structure
+
 ```typescript
-// Order: external libs -> internal modules -> relative imports
+// Order: external -> internal -> relative
 import { something } from "external-lib";
-import { util } from "@/utils/helpers";  // use path aliases
+import { util } from "@/utils/helpers";
 import { local } from "./local-file";
 
-// ESM imports for JSON/assertions:
+// ESM JSON imports:
 import pkg from "./package.json" with { type: "json" };
 ```
 
 ### Naming Conventions
+
 - **Files**: kebab-case (`my-util.ts`), colocated tests (`*.test.ts`)
 - **Classes/PascalCase**, **functions/variables camelCase**
-- **Constants**: `SCREAMING_SNAKE_CASE` for true constants
-- **Private members**: prefix with `_` or use `#` for hard private
+- **Constants**: `SCREAMING_SNAKE_CASE`
+- **Private members**: prefix with `_` or use `#`
 
 ### Formatting (Oxfmt/Oxlint)
+
 - 2 spaces indentation
-- 80-100 char line limit (be reasonable)
+- 80-100 char line limit
 - Semicolons required
-- Single quotes for strings (except template literals)
+- Single quotes for strings
 - Trailing commas in multiline
 
 ### Error Handling
+
 ```typescript
-// Use custom error types for domain errors
 import { OpenClawError } from "@/errors";
 
-// Async: always await, handle with try/catch
 async function doWork(): Promise<Result> {
   try {
     return await riskyOperation();
@@ -81,18 +92,17 @@ async function doWork(): Promise<Result> {
     throw new OpenClawError("context", { cause: error });
   }
 }
-
-// Prefer Result<T, E> pattern for expected failures
 ```
 
 ### Testing Guidelines
-- **Framework**: Vitest (compatible with Jest expect syntax)
+
+- **Framework**: Vitest (Jest-compatible)
 - **Location**: Colocated `*.test.ts` next to source files
 - **Naming**: describe/it blocks should read like sentences
 - **Coverage**: Maintain >70% threshold
 
 ```typescript
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect } from "vitest";
 import { myFunction } from "./my-module";
 
 describe("myModule", () => {
@@ -107,8 +117,9 @@ describe("myModule", () => {
 });
 ```
 
-### Tool Schema Guidelines (for MCP/Agent Tools)
-- Avoid `Type.Union` in tool schemas - use `stringEnum`/`optionalStringEnum`
+### Tool Schema Guidelines
+
+- Avoid `Type.Union` in tool schemas - use `stringEnum`
 - Keep top-level schema as `type: "object"` with `properties`
 - Avoid raw `format` property names (reserved keyword issues)
 - Use `Type.Optional(...)` instead of `... | null`
@@ -124,7 +135,7 @@ src/
   channels/     # Messaging channel adapters
   infra/        # Infrastructure and utilities
   media/        # Media pipeline
-  
+
 extensions/     # Plugin packages (workspace)
 skills/         # Built-in skills
 docs/           # Documentation
@@ -133,12 +144,14 @@ docs/           # Documentation
 ## Pre-commit Checklist
 
 Before committing, run:
+
 ```bash
 pnpm check       # Runs: tsgo + lint + format
 pnpm test        # Run tests
 ```
 
 For quick iteration, use:
+
 ```bash
 pnpm test:watch  # Watch mode for tests
 ```
