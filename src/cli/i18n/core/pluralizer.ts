@@ -1,14 +1,11 @@
-import type {
-  PluralForms,
-  LanguageCode,
-} from '../types.js';
+import type { PluralForms, LanguageCode } from "../types.js";
 
 /**
  * LanguagePluralizer - Handles pluralization rules for different languages
- * 
+ *
  * Different languages have different pluralization rules. This component
  * implements the ICU plural rules for handling plural forms.
- * 
+ *
  * Plural categories:
  * - zero: 0
  * - one: 1 (or 21, 31, etc. in some languages)
@@ -16,20 +13,20 @@ import type {
  * - few: small numbers (2-4 in Slavic languages)
  * - many: larger numbers
  * - other: default/fallback
- * 
+ *
  * @example
  * ```typescript
  * const pluralizer = new LanguagePluralizer();
- * 
+ *
  * // English rules
  * const forms: PluralForms = {
  *   one: '{{count}} item',
  *   other: '{{count}} items'
  * };
- * 
+ *
  * pluralizer.pluralize(1, forms, 'en'); // "1 item"
  * pluralizer.pluralize(5, forms, 'en'); // "5 items"
- * 
+ *
  * // Polish rules (more complex)
  * const polishForms: PluralForms = {
  *   one: '{{count}} element',
@@ -50,19 +47,19 @@ export class LanguagePluralizer {
 
   /**
    * Pluralize a count using the appropriate forms for the language
-   * 
+   *
    * @param count - The number to pluralize
    * @param forms - Object containing plural form strings
    * @param language - Language code (optional, defaults to detecting from context)
    * @returns The appropriate plural form string
    */
   pluralize(count: number, forms: PluralForms, language?: LanguageCode): string {
-    const rule = this.getPluralRule(language ?? 'en');
+    const rule = this.getPluralRule(language ?? "en");
     const category = rule(count);
-    
+
     // Get the form for this category, falling back through categories
     const form = this.selectForm(count, forms, category);
-    
+
     // Replace {{count}} with the actual count
     return form.replace(/\{\{count\}\}/g, String(count));
   }
@@ -70,11 +67,7 @@ export class LanguagePluralizer {
   /**
    * Select the appropriate plural form based on category
    */
-  private selectForm(
-    count: number,
-    forms: PluralForms,
-    category: string
-  ): string {
+  private selectForm(count: number, forms: PluralForms, category: string): string {
     // Try the specific category first
     if (category in forms && forms[category as keyof PluralForms]) {
       return forms[category as keyof PluralForms]!;
@@ -96,7 +89,7 @@ export class LanguagePluralizer {
     if (forms.many) {
       return forms.many;
     }
-    
+
     // Ultimate fallback
     return forms.other;
   }
@@ -105,20 +98,20 @@ export class LanguagePluralizer {
    * Get the plural rule function for a language
    */
   private getPluralRule(language: LanguageCode): (n: number) => string {
-    const normalizedLang = language.split('-')[0] ?? language;
-    
+    const normalizedLang = language.split("-")[0] ?? language;
+
     // Check for exact match first
     if (this.pluralRules.has(language)) {
       return this.pluralRules.get(language)!;
     }
-    
+
     // Check for base language match
     if (this.pluralRules.has(normalizedLang)) {
       return this.pluralRules.get(normalizedLang)!;
     }
-    
+
     // Default to English rules
-    return this.pluralRules.get('en')!;
+    return this.pluralRules.get("en")!;
   }
 
   /**
@@ -131,14 +124,11 @@ export class LanguagePluralizer {
 
   /**
    * Add a custom plural rule for a language
-   * 
+   *
    * @param language - Language code
    * @param rule - Function that returns the plural category for a number
    */
-  addPluralRule(
-    language: LanguageCode,
-    rule: (n: number) => string
-  ): void {
+  addPluralRule(language: LanguageCode, rule: (n: number) => string): void {
     this.pluralRules.set(language, rule);
   }
 
@@ -150,35 +140,35 @@ export class LanguagePluralizer {
     // English, German, Italian, Spanish, etc.
     // one: n is 1
     // other: everything else
-    this.pluralRules.set('en', (n) => n === 1 ? 'one' : 'other');
-    this.pluralRules.set('de', (n) => n === 1 ? 'one' : 'other');
-    this.pluralRules.set('it', (n) => n === 1 ? 'one' : 'other');
-    this.pluralRules.set('es', (n) => n === 1 ? 'one' : 'other');
-    this.pluralRules.set('pt', (n) => n === 1 ? 'one' : 'other');
-    this.pluralRules.set('nl', (n) => n === 1 ? 'one' : 'other');
-    this.pluralRules.set('sv', (n) => n === 1 ? 'one' : 'other');
+    this.pluralRules.set("en", (n) => (n === 1 ? "one" : "other"));
+    this.pluralRules.set("de", (n) => (n === 1 ? "one" : "other"));
+    this.pluralRules.set("it", (n) => (n === 1 ? "one" : "other"));
+    this.pluralRules.set("es", (n) => (n === 1 ? "one" : "other"));
+    this.pluralRules.set("pt", (n) => (n === 1 ? "one" : "other"));
+    this.pluralRules.set("nl", (n) => (n === 1 ? "one" : "other"));
+    this.pluralRules.set("sv", (n) => (n === 1 ? "one" : "other"));
 
     // French, Brazilian Portuguese
     // one: n is 0 or 1
     // other: everything else
-    this.pluralRules.set('fr', (n) => (n === 0 || n === 1) ? 'one' : 'other');
+    this.pluralRules.set("fr", (n) => (n === 0 || n === 1 ? "one" : "other"));
 
     // Chinese, Japanese, Korean (no plural distinction)
     // other: everything
-    this.pluralRules.set('zh', () => 'other');
-    this.pluralRules.set('ja', () => 'other');
-    this.pluralRules.set('ko', () => 'other');
-    this.pluralRules.set('vi', () => 'other');
+    this.pluralRules.set("zh", () => "other");
+    this.pluralRules.set("ja", () => "other");
+    this.pluralRules.set("ko", () => "other");
+    this.pluralRules.set("vi", () => "other");
 
     // Russian, Polish, Czech, Slovak (Slavic languages)
     // one: n % 10 is 1 and n % 100 is not 11
     // few: n % 10 is 2-4 and n % 100 is not 12-14
     // many: n % 10 is 0 or 5-9 or n % 100 is 11-14
     // other: everything else (fallback)
-    this.pluralRules.set('ru', this.slavicPluralRule);
-    this.pluralRules.set('pl', this.slavicPluralRule);
-    this.pluralRules.set('cs', this.slavicPluralRule);
-    this.pluralRules.set('sk', this.slavicPluralRule);
+    this.pluralRules.set("ru", this.slavicPluralRule);
+    this.pluralRules.set("pl", this.slavicPluralRule);
+    this.pluralRules.set("cs", this.slavicPluralRule);
+    this.pluralRules.set("sk", this.slavicPluralRule);
 
     // Arabic (complex plural rules)
     // zero: n is 0
@@ -187,24 +177,24 @@ export class LanguagePluralizer {
     // few: n % 100 is 3-10
     // many: n % 100 is 11-99
     // other: everything else
-    this.pluralRules.set('ar', (n) => {
+    this.pluralRules.set("ar", (n) => {
       if (n === 0) {
-        return 'zero';
+        return "zero";
       }
       if (n === 1) {
-        return 'one';
+        return "one";
       }
       if (n === 2) {
-        return 'two';
+        return "two";
       }
       const mod100 = n % 100;
       if (mod100 >= 3 && mod100 <= 10) {
-        return 'few';
+        return "few";
       }
       if (mod100 >= 11 && mod100 <= 99) {
-        return 'many';
+        return "many";
       }
-      return 'other';
+      return "other";
     });
   }
 
@@ -216,23 +206,15 @@ export class LanguagePluralizer {
     const mod100 = n % 100;
 
     if (mod10 === 1 && mod100 !== 11) {
-      return 'one';
+      return "one";
     }
     if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) {
-      return 'few';
+      return "few";
     }
     if (mod10 === 0 || (mod10 >= 5 && mod10 <= 9) || (mod100 >= 11 && mod100 <= 14)) {
-      return 'many';
+      return "many";
     }
-    return 'other';
-  }
-    if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) {
-      return 'few';
-    }
-    if (mod10 === 0 || (mod10 >= 5 && mod10 <= 9) || (mod100 >= 11 && mod100 <= 14)) {
-      return 'many';
-    }
-    return 'other';
+    return "other";
   }
 }
 
