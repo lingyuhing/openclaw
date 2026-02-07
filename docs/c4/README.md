@@ -12,6 +12,33 @@
 | [level3-component-agent.md](./level3-component-agent.md)             | Level 3 - Component      | 组件图 - Agent 运行时详细设计                    |
 | [level3-component-channels.md](./level3-component-channels.md)       | Level 3 - Component      | 组件图 - Channels 子系统详细设计                 |
 | [level3-component-android-app.md](./level3-component-android-app.md) | Level 3 - Component      | 组件图 - Android App 详细设计                    |
+| [level3-component-i18n.md](./level3-component-i18n.md)               | Level 3 - Component      | 组件图 - 国际化 (i18n) 子系统详细设计            |
+
+## 国际化 (i18n) 子系统
+
+OpenClaw 提供了完整的国际化支持，包括：
+
+### 1. UI 国际化 (`ui/src/i18n/`)
+
+- 基于 Lit 组件的语言切换器 (`<language-switcher>`)
+- 翻译文本组件 (`<t-text>`)
+- 支持英文 (en) 和中文 (zh)
+- 自动语言检测 (浏览器设置)
+- localStorage 持久化
+
+### 2. CLI 国际化 (`src/cli/i18n/`)
+
+- 命令行工具翻译支持
+- 环境变量语言检测 (`LANG`, `OPENCLAW_LANG`)
+- 配置文件存储语言偏好
+- 嵌套键支持 (`commands.gateway.description`)
+
+### 3. TUI 国际化 (`src/tui/i18n/`)
+
+- 终端界面翻译
+- 中文宽度计算 (CJK 字符 = 2 宽度)
+- 实时语言切换
+- 动态布局适配
 
 ## C4 Model 简介
 
@@ -53,6 +80,7 @@ C4 Model 是一种分层的方法来描述软件架构，由 Simon Brown 创建�
    - 如果你在做 Gateway 相关工作，看 [Gateway Component](./level3-component-gateway.md)
    - 如果你在做 Agent 相关工作，看 [Agent Component](./level3-component-agent.md)
    - 如果你在做 Channels 相关工作，看 [Channels Component](./level3-component-channels.md)
+   - 如果你在做国际化相关工作，看 [i18n Component](./level3-component-i18n.md)
 
 ## 使用 Mermaid 渲染
 
@@ -75,6 +103,8 @@ C4 Model 是一种分层的方法来描述软件架构，由 Simon Brown 创建�
 4. **Channels 插件化架构**: 每个消息平台作为独立的适配器实现，统一接口
 
 5. **配置分层**: 支持系统默认、用户配置、环境变量、命令行参数多层配置覆盖
+
+6. **国际化统一架构**: UI、CLI、TUI 三个界面共享相同的 i18n 核心设计，但针对各自环境有专门优化
 
 ## 贡献
 
