@@ -3,6 +3,7 @@ import type { RuntimeEnv } from "../runtime.js";
 import type { WizardPrompter } from "../wizard/prompts.js";
 import { resolveAgentWorkspaceDir, resolveDefaultAgentId } from "../agents/agent-scope.js";
 import { formatCliCommand } from "../cli/command-format.js";
+import { t } from "../cli/i18n-runtime.js";
 import { buildWorkspaceHookStatus } from "../hooks/hooks-status.js";
 
 export async function setupInternalHooks(
@@ -12,12 +13,12 @@ export async function setupInternalHooks(
 ): Promise<OpenClawConfig> {
   await prompter.note(
     [
-      "Hooks let you automate actions when agent commands are issued.",
-      "Example: Save session context to memory when you issue /new.",
+      t("onboard.hooks.description"),
+      t("onboard.hooks.example"),
       "",
       "Learn more: https://docs.openclaw.ai/hooks",
     ].join("\n"),
-    "Hooks",
+    t("onboard.hooks.title"),
   );
 
   // Discover available hooks using the hook discovery system
@@ -28,17 +29,14 @@ export async function setupInternalHooks(
   const eligibleHooks = report.hooks.filter((h) => h.eligible);
 
   if (eligibleHooks.length === 0) {
-    await prompter.note(
-      "No eligible hooks found. You can configure hooks later in your config.",
-      "No Hooks Available",
-    );
+    await prompter.note(t("onboard.hooks.noHooks"), t("onboard.hooks.noHooksAvailable"));
     return cfg;
   }
 
   const toEnable = await prompter.multiselect({
-    message: "Enable hooks?",
+    message: t("onboard.hooks.enableHooks"),
     options: [
-      { value: "__skip__", label: "Skip for now" },
+      { value: "__skip__", label: t("common.skip") },
       ...eligibleHooks.map((hook) => ({
         value: hook.name,
         label: `${hook.emoji ?? "🔗"} ${hook.name}`,
@@ -71,14 +69,14 @@ export async function setupInternalHooks(
 
   await prompter.note(
     [
-      `Enabled ${selected.length} hook${selected.length > 1 ? "s" : ""}: ${selected.join(", ")}`,
+      t("onboard.hooks.enabled", { count: selected.length, names: selected.join(", ") }),
       "",
-      "You can manage hooks later with:",
+      t("onboard.hooks.manageLater"),
       `  ${formatCliCommand("openclaw hooks list")}`,
       `  ${formatCliCommand("openclaw hooks enable <name>")}`,
       `  ${formatCliCommand("openclaw hooks disable <name>")}`,
     ].join("\n"),
-    "Hooks Configured",
+    t("onboard.hooks.configured"),
   );
 
   return next;

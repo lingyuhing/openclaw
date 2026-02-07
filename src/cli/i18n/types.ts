@@ -153,6 +153,7 @@ export interface Translator {
 }
 
 export interface Loader {
+  load(lang: LanguageCode): Promise<TranslationData>;
   loadLanguage(lang: LanguageCode): Promise<TranslationData>;
   hasLoaded(lang: LanguageCode): boolean;
   unload(lang: LanguageCode): void;
@@ -163,6 +164,10 @@ export interface Formatter {
   formatPlural(count: number, forms: PluralForms): string;
   escapeHtml(text: string): string;
   unescapeHtml(text: string): string;
+}
+
+export interface Interpolator {
+  interpolate(text: string, params: InterpolationParams): string;
 }
 
 export interface Pluralizer {

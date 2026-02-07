@@ -10,6 +10,7 @@ import type { QuickstartGatewayDefaults, WizardFlow } from "./onboarding.types.j
 import { ensureAuthProfileStore } from "../agents/auth-profiles.js";
 import { listChannelPlugins } from "../channels/plugins/index.js";
 import { formatCliCommand } from "../cli/command-format.js";
+import { t } from "../cli/i18n-runtime.js";
 import { promptAuthChoiceGrouped } from "../commands/auth-choice-prompt.js";
 import {
   applyAuthChoice,
@@ -53,32 +54,15 @@ async function requireRiskAcknowledgement(params: {
 
   await params.prompter.note(
     [
-      "Security warning — please read.",
-      "",
-      "OpenClaw is a hobby project and still in beta. Expect sharp edges.",
-      "This bot can read files and run actions if tools are enabled.",
-      "A bad prompt can trick it into doing unsafe things.",
-      "",
-      "If you’re not comfortable with basic security and access control, don’t run OpenClaw.",
-      "Ask someone experienced to help before enabling tools or exposing it to the internet.",
-      "",
-      "Recommended baseline:",
-      "- Pairing/allowlists + mention gating.",
-      "- Sandbox + least-privilege tools.",
-      "- Keep secrets out of the agent’s reachable filesystem.",
-      "- Use the strongest available model for any bot with tools or untrusted inboxes.",
-      "",
-      "Run regularly:",
-      "openclaw security audit --deep",
-      "openclaw security audit --fix",
+      t("onboard.security_warning.content"),
       "",
       "Must read: https://docs.openclaw.ai/gateway/security",
     ].join("\n"),
-    "Security",
+    t("common.security"),
   );
 
   const ok = await params.prompter.confirm({
-    message: "I understand this is powerful and inherently risky. Continue?",
+    message: t("onboard.security_warning.confirm"),
     initialValue: false,
   });
   if (!ok) {

@@ -8,6 +8,7 @@
 pnpm install          # Install dependencies
 pnpm dev             # Run CLI in dev mode
 pnpm gateway:watch   # Watch mode for gateway
+pnpm openclaw        # Run the CLI
 ```
 
 ### Build & Check
@@ -24,6 +25,8 @@ pnpm check           # Lint + format + type check
 pnpm test                    # Run all tests (parallel)
 pnpm test:watch             # Watch mode
 pnpm test:coverage          # With coverage
+pnpm test:e2e               # E2E tests
+pnpm test:live              # Live integration tests
 
 # Single test file:
 npx vitest run src/path/to/file.test.ts
@@ -35,10 +38,19 @@ npx vitest run -t "should handle valid input"
 ### Lint/Format
 
 ```bash
-pnpm lint            # Check linting
+pnpm lint            # Check linting (oxlint)
 pnpm lint:fix        # Fix lint issues
-pnpm format          # Check formatting
+pnpm format          # Check formatting (oxfmt)
 pnpm format:fix      # Fix formatting
+```
+
+### Mobile Development
+
+```bash
+pnpm ios:build       # Build iOS app
+pnpm ios:run         # Run iOS simulator
+pnpm mac:package     # Package macOS app
+pnpm android:run     # Run Android app
 ```
 
 ## Code Style Guidelines
@@ -124,6 +136,16 @@ describe("myModule", () => {
 - Avoid raw `format` property names (reserved keyword issues)
 - Use `Type.Optional(...)` instead of `... | null`
 
+### i18n Guidelines
+
+Use the translation function for user-facing strings:
+
+```typescript
+import { t } from "../cli/i18n-runtime.js";
+
+prompter.confirm({ message: t("onboard.channels.configureNow") });
+```
+
 ## Project Structure
 
 ```
@@ -135,10 +157,12 @@ src/
   channels/     # Messaging channel adapters
   infra/        # Infrastructure and utilities
   media/        # Media pipeline
+  i18n/         # Internationalization
 
 extensions/     # Plugin packages (workspace)
 skills/         # Built-in skills
 docs/           # Documentation
+apps/           # iOS, macOS, Android apps
 ```
 
 ## Pre-commit Checklist

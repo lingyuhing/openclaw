@@ -12,6 +12,7 @@ export type {
   I18nAPI,
   ConfigAPI,
   UtilsAPI,
+  Loader,
 } from "./types.js";
 
 // Core functionality

@@ -7,6 +7,7 @@ import type {
   WizardFlow,
 } from "./onboarding.types.js";
 import type { WizardPrompter } from "./prompts.js";
+import { t } from "../cli/i18n-runtime.js";
 import { normalizeGatewayTokenInput, randomToken } from "../commands/onboard-helpers.js";
 import { findTailscaleBinary } from "../infra/tailscale.js";
 
@@ -37,9 +38,10 @@ export async function configureGatewayForOnboarding(
       : Number.parseInt(
           String(
             await prompter.text({
-              message: "Gateway port",
+              message: t("onboard.gateway.port"),
               initialValue: String(localPort),
-              validate: (value) => (Number.isFinite(Number(value)) ? undefined : "Invalid port"),
+              validate: (value) =>
+                Number.isFinite(Number(value)) ? undefined : t("errors.invalidInput"),
             }),
           ),
           10,
@@ -49,13 +51,13 @@ export async function configureGatewayForOnboarding(
     flow === "quickstart"
       ? quickstartGateway.bind
       : await prompter.select<GatewayWizardSettings["bind"]>({
-          message: "Gateway bind",
+          message: t("onboard.gateway.bind"),
           options: [
-            { value: "loopback", label: "Loopback (127.0.0.1)" },
-            { value: "lan", label: "LAN (0.0.0.0)" },
-            { value: "tailnet", label: "Tailnet (Tailscale IP)" },
-            { value: "auto", label: "Auto (Loopback → LAN)" },
-            { value: "custom", label: "Custom IP" },
+            { value: "loopback", label: t("onboard.gateway.loopback") },
+            { value: "lan", label: t("onboard.gateway.lan") },
+            { value: "tailnet", label: t("onboard.gateway.tailnet") },
+            { value: "auto", label: t("onboard.gateway.auto") },
+            { value: "custom", label: t("onboard.gateway.custom") },
           ],
         });
 
@@ -64,17 +66,17 @@ export async function configureGatewayForOnboarding(
     const needsPrompt = flow !== "quickstart" || !customBindHost;
     if (needsPrompt) {
       const input = await prompter.text({
-        message: "Custom IP address",
+        message: t("onboard.gateway.customIp"),
         placeholder: "192.168.1.100",
         initialValue: customBindHost ?? "",
         validate: (value) => {
           if (!value) {
-            return "IP address is required for custom bind mode";
+            return t("onboard.gateway.customIpRequired");
           }
           const trimmed = value.trim();
           const parts = trimmed.split(".");
           if (parts.length !== 4) {
-            return "Invalid IPv4 address (e.g., 192.168.1.100)";
+            return t("onboard.gateway.customIpInvalid");
           }
           if (
             parts.every((part) => {
@@ -84,7 +86,7 @@ export async function configureGatewayForOnboarding(
           ) {
             return undefined;
           }
-          return "Invalid IPv4 address (each octet must be 0-255)";
+          return t("onboard.gateway.customIpOctet");
         },
       });
       customBindHost = typeof input === "string" ? input.trim() : undefined;
@@ -95,14 +97,14 @@ export async function configureGatewayForOnboarding(
     flow === "quickstart"
       ? quickstartGateway.authMode
       : ((await prompter.select({
-          message: "Gateway auth",
+          message: t("onboard.gateway.auth"),
           options: [
             {
               value: "token",
-              label: "Token",
-              hint: "Recommended default (local + remote)",
+              label: t("onboard.gateway.token"),
+              hint: t("onboard.gateway.tokenHint"),
             },
-            { value: "password", label: "Password" },
+            { value: "password", label: t("onboard.gateway.password") },
           ],
           initialValue: "token",
         })) as GatewayAuthChoice);
@@ -111,18 +113,22 @@ export async function configureGatewayForOnboarding(
     flow === "quickstart"
       ? quickstartGateway.tailscaleMode
       : await prompter.select<GatewayWizardSettings["tailscaleMode"]>({
-          message: "Tailscale exposure",
+          message: t("onboard.gateway.tailscaleExposure"),
           options: [
-            { value: "off", label: "Off", hint: "No Tailscale exposure" },
+            {
+              value: "off",
+              label: t("onboard.gateway.tailscaleOff"),
+              hint: t("onboard.gateway.tailscaleOffHint"),
+            },
             {
               value: "serve",
-              label: "Serve",
-              hint: "Private HTTPS for your tailnet (devices on Tailscale)",
+              label: t("onboard.gateway.tailscaleServe"),
+              hint: t("onboard.gateway.tailscaleServeHint"),
             },
             {
               value: "funnel",
-              label: "Funnel",
-              hint: "Public HTTPS via Tailscale Funnel (internet)",
+              label: t("onboard.gateway.tailscaleFunnel"),
+              hint: t("onboard.gateway.tailscaleFunnelHint"),
             },
           ],
         });
@@ -133,13 +139,13 @@ export async function configureGatewayForOnboarding(
     if (!tailscaleBin) {
       await prompter.note(
         [
-          "Tailscale binary not found in PATH or /Applications.",
-          "Ensure Tailscale is installed from:",
+          t("onboard.gateway.tailscaleNotFound"),
+          t("onboard.gateway.ensureInstalled"),
           "  https://tailscale.com/download/mac",
           "",
-          "You can continue setup, but serve/funnel will fail at runtime.",
+          t("onboard.gateway.serveFunnelFail"),
         ].join("\n"),
-        "Tailscale Warning",
+        t("onboard.gateway.tailscaleWarning"),
       );
     }
   }
@@ -150,11 +156,11 @@ export async function configureGatewayForOnboarding(
       ["Docs:", "https://docs.openclaw.ai/gateway/tailscale", "https://docs.openclaw.ai/web"].join(
         "\n",
       ),
-      "Tailscale",
+      t("onboard.gateway.tailscale"),
     );
     tailscaleResetOnExit = Boolean(
       await prompter.confirm({
-        message: "Reset Tailscale serve/funnel on exit?",
+        message: t("onboard.gateway.resetOnExit"),
         initialValue: false,
       }),
     );
@@ -164,13 +170,13 @@ export async function configureGatewayForOnboarding(
   // - Tailscale wants bind=loopback so we never expose a non-loopback server + tailscale serve/funnel at once.
   // - Funnel requires password auth.
   if (tailscaleMode !== "off" && bind !== "loopback") {
-    await prompter.note("Tailscale requires bind=loopback. Adjusting bind to loopback.", "Note");
+    await prompter.note(t("onboard.gateway.tailscaleRequiresLoopback"), t("common.warning"));
     bind = "loopback";
     customBindHost = undefined;
   }
 
   if (tailscaleMode === "funnel" && authMode !== "password") {
-    await prompter.note("Tailscale funnel requires password auth.", "Note");
+    await prompter.note(t("onboard.gateway.tailscaleFunnelRequiresPassword"), t("common.warning"));
     authMode = "password";
   }
 
@@ -180,8 +186,8 @@ export async function configureGatewayForOnboarding(
       gatewayToken = quickstartGateway.token ?? randomToken();
     } else {
       const tokenInput = await prompter.text({
-        message: "Gateway token (blank to generate)",
-        placeholder: "Needed for multi-machine or non-loopback access",
+        message: t("onboard.gateway.tokenInput"),
+        placeholder: t("onboard.gateway.tokenPlaceholder"),
         initialValue: quickstartGateway.token ?? "",
       });
       gatewayToken = normalizeGatewayTokenInput(tokenInput) || randomToken();
@@ -193,8 +199,8 @@ export async function configureGatewayForOnboarding(
       flow === "quickstart" && quickstartGateway.password
         ? quickstartGateway.password
         : await prompter.text({
-            message: "Gateway password",
-            validate: (value) => (value?.trim() ? undefined : "Required"),
+            message: t("onboard.gateway.passwordInput"),
+            validate: (value) => (value?.trim() ? undefined : t("validation.required")),
           });
     nextConfig = {
       ...nextConfig,

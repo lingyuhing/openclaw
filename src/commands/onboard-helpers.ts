@@ -7,6 +7,7 @@ import type { OpenClawConfig } from "../config/config.js";
 import type { RuntimeEnv } from "../runtime.js";
 import type { NodeManagerChoice, OnboardMode, ResetScope } from "./onboard-types.js";
 import { DEFAULT_AGENT_WORKSPACE_DIR, ensureAgentWorkspace } from "../agents/workspace.js";
+import { t } from "../cli/i18n-runtime.js";
 import { CONFIG_PATH } from "../config/config.js";
 import { resolveSessionTranscriptsDirForAgent } from "../config/sessions.js";
 import { callGateway } from "../gateway/call.js";
@@ -28,7 +29,7 @@ import { VERSION } from "../version.js";
 
 export function guardCancel<T>(value: T | symbol, runtime: RuntimeEnv): T {
   if (isCancel(value)) {
-    cancel(stylePromptTitle("Setup cancelled.") ?? "Setup cancelled.");
+    cancel(stylePromptTitle(t("common.cancel")) ?? t("onboard.cancelled"));
     runtime.exit(0);
   }
   return value;
@@ -61,7 +62,7 @@ export function summarizeExistingConfig(config: OpenClawConfig): string {
   if (config.skills?.install?.nodeManager) {
     rows.push(shortenHomeInString(`skills.nodeManager: ${config.skills.install.nodeManager}`));
   }
-  return rows.length ? rows.join("\n") : "No key settings detected.";
+  return rows.length ? rows.join("\n") : t("onboard.no_key_settings");
 }
 
 export function randomToken(): string {
@@ -264,10 +265,10 @@ export async function ensureWorkspaceAndSessions(
     dir: workspaceDir,
     ensureBootstrapFiles: !options?.skipBootstrap,
   });
-  runtime.log(`Workspace OK: ${shortenHomePath(ws.dir)}`);
+  runtime.log(t("onboard.workspace_ok", { path: shortenHomePath(ws.dir) }));
   const sessionsDir = resolveSessionTranscriptsDirForAgent(options?.agentId);
   await fs.mkdir(sessionsDir, { recursive: true });
-  runtime.log(`Sessions OK: ${shortenHomePath(sessionsDir)}`);
+  runtime.log(t("onboard.sessions_ok", { path: shortenHomePath(sessionsDir) }));
 }
 
 export function resolveNodeManagerOptions(): Array<{
@@ -292,9 +293,9 @@ export async function moveToTrash(pathname: string, runtime: RuntimeEnv): Promis
   }
   try {
     await runCommandWithTimeout(["trash", pathname], { timeoutMs: 5000 });
-    runtime.log(`Moved to Trash: ${shortenHomePath(pathname)}`);
+    runtime.log(t("onboard.moved_to_trash", { path: shortenHomePath(pathname) }));
   } catch {
-    runtime.log(`Failed to move to Trash (manual delete): ${shortenHomePath(pathname)}`);
+    runtime.log(t("onboard.failed_to_trash", { path: shortenHomePath(pathname) }));
   }
 }
 
